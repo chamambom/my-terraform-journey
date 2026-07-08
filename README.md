@@ -9,6 +9,40 @@
     GitHub:  https://github.com/adamrushuk
     Twitter: @adamrushuk
 
+---
+
+## AI-Assisted Infrastructure as Code: New Ways of Working in Cloud Platform Engineering
+
+This section documents how I've integrated AI tooling into my daily Cloud Platform Engineering workflow — using Model Context Protocol (MCP) servers, AI coding assistants, and automated code review to accelerate infrastructure-as-code development.
+
+- [MCP Server Architectures](docs/mcp-server-architectures.md) — How different MCP servers are configured (stdio, Docker, HTTP remote, proxy)
+- [Atlassian MCP Authentication](docs/atlassian-mcp-authentication.md) — How the Atlassian Rovo MCP Server uses OAuth 2.1
+- [My MCP Configuration](docs/my-mcp-configuration.md) — How I globalise my MCP config and why
+
+---
+
+### Why This Matters
+
+Infrastructure as Code (IaC) has always been about codifying cloud operations. AI assistants don't replace the engineer — they eliminate the repetitive parts: searching docs, writing boilerplate, cross-referencing resources, and catching configuration drift. The human still designs the system, makes the decisions, and owns the outcome.
+
+### Tooling
+
+| Tool | Purpose | Notes |
+|---|---|---|
+| [Kiro CLI](https://kiro.dev) | AI coding assistant (terminal) | Primary tool for IaC authoring, code review, and AWS operations |
+| [GitHub Copilot](https://github.com/features/copilot) | AI coding assistant (IDE) | Used interchangeably with Kiro — functionally similar for IaC work |
+| [Atlassian Rovo MCP Server](https://mcp.atlassian.com) | Jira + Confluence integration | Read/write tickets and docs from the terminal |
+| [AWS MCP Server](https://github.com/awslabs/mcp) | AWS CLI + docs via MCP | Multi-account/region AWS operations with credential proxy |
+| [Terraform MCP Server](https://github.com/hashicorp/terraform-mcp-server) | Terraform registry search + docs | Provider/module lookup, runs in Docker |
+| GitHub PR reviews | Code review | Push to GitHub, review via PR process |
+
+### Key Principles
+
+1. **MCP servers are cheap** — they only consume context when you call them. Having 5+ configured costs nothing until you invoke a tool.
+2. **Globalise your config** — shared MCP config at `~/.kiro/settings/mcp.json` means every workspace gets the same tools without per-project setup.
+3. **AI is the junior engineer** — it writes the code, you review and approve. The mental model is pair programming where you're always the senior.
+4. **Push to GitHub for review** — AI-generated code goes through the same PR process as hand-written code. No shortcuts on review.
+
 This repository contains Terraform code snippets and notes on best practices that I often use when working with AWS or Azure.
 
 ##### Background:
