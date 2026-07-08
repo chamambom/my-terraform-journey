@@ -52,18 +52,29 @@ When working solo, the `.tfstate` file lives on your local machine. This breaks 
 
 ---
 
-## Azure Setup
+## Azure Setup — Bootstrapping
 
-Secure **Azure** provisioning using Terraform with a [Remote Backend](https://www.terraform.io/docs/backends/types/azurerm.html) and [Key Vault](https://azure.microsoft.com/en-gb/services/key-vault/) for credential storage.
+This section is **bootstrapping** — the one-time setup you must do *before* Terraform can manage anything in your Azure tenant. It's a classic chicken-and-egg problem:
 
-Terraform needs the Storage Account key to run `init`, `plan`, and `apply`. Rather than hardcoding it, we store it in Azure Key Vault.
+> Terraform needs a Service Principal, Storage Account, and Key Vault to run — but those resources don't exist yet. You can't use Terraform to create the identity that Terraform itself needs to authenticate. So we bootstrap with PowerShell first, then hand over to Terraform for everything else.
+
+Once bootstrapping is complete, Terraform uses the Service Principal and remote backend for all subsequent infrastructure provisioning.
+
+### What Gets Bootstrapped
+
+| Resource | Purpose |
+|---|---|
+| Service Principal | Terraform's identity in Azure AD — used to authenticate all API calls |
+| Storage Account + Container | Hosts the remote `.tfstate` file |
+| Key Vault | Stores sensitive credentials (client secret, access keys) outside of code |
+| Key Vault Access Policies | Grants the Service Principal and your admin user access to secrets |
 
 ### Step 1: Prerequisites
 
 1. [Install the Azure PowerShell module](https://docs.microsoft.com/en-us/powershell/azure/install-az-ps)
 2. Log in to Azure: `Connect-AzAccount`
 
-### Step 2: Configure Azure for Secure Terraform Access
+### Step 2: Run the Bootstrap Script
 
 1. Open `azure-scripts/ConfigureAzureForSecureTerraformAccess.ps1`
 2. Update the `$adminUserDisplayName` variable to match your Azure AD admin display name
@@ -71,10 +82,10 @@ Terraform needs the Storage Account key to run `init`, `plan`, and `apply`. Rath
 
 The script creates:
 
-- An Azure Service Principal for Terraform
-- A Resource Group, Storage Account, and Storage Container
+- A Service Principal for Terraform (with Contributor role)
+- A Resource Group, Storage Account, and Storage Container for state
 - A Key Vault with access policies
-- Key Vault secrets for sensitive credentials:
+- Key Vault secrets:
   - `ARM_SUBSCRIPTION_ID`
   - `ARM_CLIENT_ID`
   - `ARM_CLIENT_SECRET`
@@ -97,6 +108,8 @@ choco install terraform
 
 ### Step 5: Provision Infrastructure
 
+Once bootstrapped, Terraform manages everything else:
+
 1. Navigate to `azure-examples/remote-backend/`
 2. Update `storage_account_name` in the `backend` block of `main.tf`
 3. Run:
@@ -117,32 +130,76 @@ terraform destroy
 
 ---
 
-## AWS Setup
+## AWS Setup — Bootstrapping & Authentication
 
-### Step 1: Prerequisites
+Like Azure, AWS has its own chicken-and-egg problem: Terraform needs IAM credentials to provision infrastructure, but those credentials and roles need to be created first. The difference is that AWS offers more flexibility in how you authenticate — and **temporary credentials via IAM roles are strongly preferred** over long-lived access keys.
 
-1. [Install the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
-2. Authenticate via AWS SSO (using [Granted](https://docs.commonfate.io/granted/getting-started)) or access key + secret key
+### Authentication Methods (Best → Worst)
 
-### Step 2: Configure AWS Provider
+| Method | Security | Use Case |
+|---|---|---|
+| **IAM Identity Center (SSO)** | ✅ Best | Teams using AWS Organizations. Short-lived tokens, no keys to rotate. |
+| **IAM Roles + AssumeRole** | ✅ Strong | Cross-account access, CI/CD pipelines. Temporary credentials with configurable session duration. |
+| **Environment variables** | ⚠️ Acceptable | Local dev with short-lived tokens from SSO or STS. |
+| **Static access keys** | ❌ Avoid | Long-lived, no expiry, high blast radius if leaked. Legacy only. |
 
-Use environment variables (recommended) or provider block configuration:
+### Recommended: AWS SSO with Granted
+
+For local development, use [Granted](https://docs.commonfate.io/granted/getting-started) to manage AWS SSO profiles. This gives you temporary credentials that auto-refresh:
+
+```bash
+# Assume a profile (opens browser for SSO login)
+assume my-dev-account
+
+# Terraform automatically picks up the session credentials
+terraform plan
+```
+
+### Using IAM Roles (CI/CD and Cross-Account)
+
+In CI/CD pipelines or multi-account setups, Terraform assumes an IAM role rather than using static keys:
 
 ```hcl
 provider "aws" {
-  region = "us-west-2"
+  region = "ap-southeast-2"
+
+  assume_role {
+    role_arn     = "arn:aws:iam::123456789012:role/TerraformDeployRole"
+    session_name = "terraform-ci"
+  }
 }
 ```
 
-Set credentials via environment variables:
+The pipeline authenticates with a base identity (e.g., GitHub OIDC, instance profile) and then assumes the deployment role. This gives you:
+
+- **Temporary credentials** — tokens expire after the session (default 1 hour)
+- **Least privilege** — the role only has permissions needed for that account/workload
+- **Auditability** — CloudTrail logs show which role was assumed by whom
+
+### Bootstrap: What You Create Manually
+
+Before Terraform can manage an AWS account, you need to create:
+
+| Resource | Purpose |
+|---|---|
+| S3 bucket | Remote state storage |
+| DynamoDB table | State locking (prevents concurrent applies) |
+| IAM role/user | Terraform's identity for API access |
+| OIDC provider (CI/CD) | Allows GitHub Actions / GitLab to assume roles without static keys |
+
+> ⚠️ Like Azure, these bootstrap resources are created outside of Terraform (via CLI, CloudFormation, or ClickOps) because Terraform can't create the identity it needs to authenticate.
+
+### Example: Environment Variables (local dev fallback)
+
+If you must use environment variables:
 
 ```bash
-export AWS_ACCESS_KEY_ID="my-access-key"
-export AWS_SECRET_ACCESS_KEY="my-secret-key"
-export AWS_REGION="us-west-2"
+export AWS_ACCESS_KEY_ID="AKIA..."
+export AWS_SECRET_ACCESS_KEY="..."
+export AWS_REGION="ap-southeast-2"
 ```
 
-> ⚠️ Never hardcode credentials in `.tf` files. Use environment variables, AWS SSO profiles, or a secrets manager.
+> ⚠️ Never hardcode credentials in `.tf` files. Never commit access keys to source control. Prefer SSO or IAM role assumption for all workflows.
 
 ---
 
