@@ -5,6 +5,8 @@ nav_order: 1
 
 # My Terraform Journey
 
+📂 **Repository:** [github.com/chamambom/my-terraform-journey](https://github.com/chamambom/my-terraform-journey)
+
 A living repository of Terraform best practices, IaC patterns, and documentation of how I work with infrastructure as code — from the early days at a Cloud Service Provider in Southern Africa to Cloud Platform Engineering with AI-assisted tooling in New Zealand.
 
 ---
