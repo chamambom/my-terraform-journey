@@ -16,6 +16,7 @@ A living repository of Terraform best practices, IaC patterns, and documentation
 - **[Atlassian MCP Authentication](docs/atlassian-mcp-authentication.md)** — OAuth 2.1 flow, scopes, troubleshooting
 - **[My MCP Configuration](docs/my-mcp-configuration.md)** — Globalised config, design decisions, cost model
 - **[PR Workflow](docs/pr-workflow.md)** — Feature branch strategy, CI checks, AI + human review
+- **[Cloud Provider Setup](docs/cloud-provider-setup.md)** — Azure & AWS Terraform bootstrapping, remote backends, credentials
 - **[Terraform Best Practices](README-TERRAFORM-BEST-PRACTICES.md)** — Compiled list of IaC principles
 - **[Azure Examples](AZURE-Terraform/)** — Hub-and-spoke, vWAN, utility snippets
 - **[AWS Examples](AWS-Terraform/)** — ASG/LB patterns, remote backend
