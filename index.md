@@ -20,8 +20,8 @@ A living repository of Terraform best practices, IaC patterns, and documentation
 - **[PR Workflow](docs/pr-workflow.md)** — Feature branch strategy, CI checks, AI + human review
 - **[Cloud Provider Setup](docs/cloud-provider-setup.md)** — Azure & AWS Terraform bootstrapping, remote backends, credentials
 - **[Terraform Best Practices](README-TERRAFORM-BEST-PRACTICES.md)** — Compiled list of IaC principles
-- **[Azure Examples](AZURE-Terraform/)** — Hub-and-spoke, vWAN, utility snippets
-- **[AWS Examples](AWS-Terraform/)** — ASG/LB patterns, remote backend
+- **[Azure Examples](https://github.com/chamambom/my-terraform-journey/tree/main/AZURE-Terraform)** — Hub-and-spoke, vWAN, utility snippets
+- **[AWS Examples](https://github.com/chamambom/my-terraform-journey/tree/main/AWS-Terraform)** — ASG/LB patterns, remote backend
 
 ---
 
