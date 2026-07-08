@@ -1,3 +1,9 @@
+---
+title: My MCP Configuration
+nav_order: 6
+parent: AI-Assisted IaC
+---
+
 # My MCP Configuration
 
 This documents how I configure MCP servers globally and the reasoning behind the approach.
@@ -45,7 +51,7 @@ I run 6 MCP servers and only typically invoke 2-3 per session.
       "command": "bash",
       "args": [
         "-lc",
-        "uvx mcp-proxy-for-aws@1.6.2 https://aws-mcp.us-east-1.api.aws/mcp --region ap-southeast-2 --profile met-infra-management met-infra-network met-infra-sharedservices-prod"
+        "uvx mcp-proxy-for-aws@1.6.2 https://aws-mcp.us-east-1.api.aws/mcp --region ap-southeast-2 --profile org-management org-network org-sharedservices"
       ],
       "env": {},
       "disabled": false
@@ -59,7 +65,7 @@ I run 6 MCP servers and only typically invoke 2-3 per session.
       "command": "bash",
       "args": ["-lc", "uvx awslabs.cloudwatch-mcp-server@latest"],
       "env": {
-        "AWS_PROFILE": "met-infra-management",
+        "AWS_PROFILE": "org-management",
         "AWS_REGION": "ap-southeast-2",
         "FASTMCP_LOG_LEVEL": "ERROR"
       },
@@ -69,7 +75,7 @@ I run 6 MCP servers and only typically invoke 2-3 per session.
       "command": "bash",
       "args": ["-lc", "uvx awslabs.cloudtrail-mcp-server@latest"],
       "env": {
-        "AWS_PROFILE": "met-infra-management",
+        "AWS_PROFILE": "org-management",
         "AWS_REGION": "ap-southeast-2",
         "FASTMCP_LOG_LEVEL": "ERROR"
       },

@@ -1,3 +1,9 @@
+---
+title: Atlassian MCP Authentication
+nav_order: 4
+parent: AI-Assisted IaC
+---
+
 # Atlassian Rovo MCP Server — Authentication
 
 The Atlassian Rovo MCP Server is a cloud-hosted remote MCP server that provides AI agents access to Jira, Confluence, and Compass. It uses **OAuth 2.1** as its primary authentication mechanism.

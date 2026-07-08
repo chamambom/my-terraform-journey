@@ -1,0 +1,12 @@
+remote_theme: just-the-docs/just-the-docs
+plugins:
+  - jekyll-remote-theme
+
+title: My Terraform Journey
+description: Terraform best practices, IaC patterns, and AI-assisted Cloud Platform Engineering workflows
+
+# Top-level header pages
+header_pages:
+  - index.md
+  - docs/ai-assisted-iac.md
+  - docs/mcp-server-architectures.md
