@@ -5,6 +5,14 @@ plugins:
 title: My Terraform Journey
 description: Terraform best practices, IaC patterns, and AI-assisted Cloud Platform Engineering workflows
 
+# Exclude directories with Terraform code (contain {{ }} placeholders that break Liquid)
+exclude:
+  - AZURE-Terraform/
+  - AWS-Terraform/
+  - Gemfile
+  - Gemfile.lock
+  - LICENSE
+
 # Top-level header pages
 header_pages:
   - index.md
